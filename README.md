@@ -1,0 +1,2 @@
+# fincal
+A finance planner
