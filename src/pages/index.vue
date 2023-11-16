@@ -19,7 +19,7 @@
                     <k-table-cell>{{ sip.earned }}</k-table-cell>
                     <k-table-cell>{{ sip.gains*100 }}</k-table-cell>
                     <k-table-cell>{{ sip.cagr*100 }}</k-table-cell>
-                    <k-table-cell>{{ sip.xirrNew }}</k-table-cell>
+                    <k-table-cell>{{ sip.xirr*100 }}</k-table-cell>
                 </k-table-row>
             </k-table-body>
             </k-table>
@@ -98,7 +98,7 @@ const sipCalculator = () => {
         const foundIndex = investments.findIndex((item) => item.date.getTime() === loopDate.getTime());
         const prev : number = returnsPerDay.length == 0 ? 0 : returnsPerDay[returnsPerDay.length - 1].amount;
         if (foundIndex !== -1) { // If found
-            returnsPerDay.push({ amount: prev*(1+intrestPerDay) + investments[foundIndex].amount, date: new Date(loopDate) });
+            returnsPerDay.push({ amount: prev*(1+intrestPerDay) + investments[foundIndex].amount*(1+intrestPerDay), date: new Date(loopDate) });
         } else {
             returnsPerDay.push({ amount: prev*(1+intrestPerDay), date: new Date(loopDate) });
         };
@@ -122,9 +122,7 @@ const xirrCalculator = () => {
     const { days, rate } = xirrM(updatedInvestments);
     const xirr: Investments[] = [];
     earnedPerDay.map((items, index) => {
-        if (index < days) {
-            xirr.push({ amount: (index+1)*(rate), date: new Date(earnedPerDay[index].date) });
-        };
+        xirr.push({ amount: (items.amount === 0) ? 0 :  days*rate, date: new Date(earnedPerDay[index].date) });
     });
     return xirr;
 };
@@ -159,7 +157,7 @@ const cagrCalculator = () => {
         };
         const endDate = earnedEach.date;
         const numOfYears = Math.abs(endDate.getFullYear() - startDate.getFullYear()) + 1;
-        const cagr = (totalReturn/totalInvestment)**(1/numOfYears) - 1;
+        const cagr = (totalReturn/totalInvestment || 1)**(1/numOfYears) - 1;
         gains.push({ amount: cagr, date: new Date(earnedEach.date) });
     });
     return gains;
@@ -180,23 +178,6 @@ const investedCalculator = () => {
     return investment;
 };
 
-const xirrNewCalculator = () => {
-    let xirr: Investments[] = [];
-    let amount = 0;
-    earnedPerDay.map((earnedEach) => {
-        const foundIndex = investments.findIndex((investedPerDay) => investedPerDay.date.getTime() === earnedEach.date.getTime());
-        const prev : number = earnedPerDay.length == 0 ? 1 : earnedPerDay[earnedPerDay.length - 1].amount;
-        if (foundIndex !== -1) { // found it
-            amount += ((earnedEach.amount - investments[foundIndex].amount) / prev) - 1;
-        } else {
-            amount += ((earnedEach.amount) / prev) - 1;
-        };
-        xirr.push({ amount: amount, date: new Date(earnedEach.date) });
-    });
-    return xirr;
-};
-
-
 const merged = (filter=true) => {
     const mergedStore: SipParams[] = [];
     earnedPerDay.map((earnedEach, i) => {
@@ -210,7 +191,7 @@ const merged = (filter=true) => {
                 earned: earnedEach.amount,
                 gains: gains[i].amount,
                 cagr: cagr[i].amount,
-                xirr: xirr[i].amount,
+                xirr: xirr[i]?.amount,
             } as SipParams);
         } else if (!filter) {
             mergedStore.push({
@@ -219,7 +200,7 @@ const merged = (filter=true) => {
                 earned: earnedEach.amount,
                 gains: gains[i].amount,
                 cagr: cagr[i].amount,
-                xirr: xirr[i].amount,
+                xirr: xirr[i]?.amount,
             } as SipParams);
         };
     });
@@ -231,7 +212,6 @@ const investedPerDay = investedCalculator();
 const gains = gainCalculator();
 const cagr = cagrCalculator();
 const xirr = xirrCalculator();
-const xirrNew = xirrNewCalculator();
 
 sips = merged();
 
