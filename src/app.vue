@@ -1,7 +1,11 @@
 <template>
-  <div>
-    <h1 class="text-3xl font-bold underline">
-      Hello world!
-    </h1>
-  </div>
+  <k-app theme="material">
+    <NuxtPage />
+  </k-app>
 </template>
+
+<script setup lang="ts">
+
+  import { kApp } from 'konsta/vue';
+
+</script>

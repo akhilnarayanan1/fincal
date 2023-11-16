@@ -17,7 +17,11 @@
     "vue-router": "^4.2.5"
   },
   "dependencies": {
+    "@formulajs/formulajs": "^4.3.4",
     "firebase": "^10.5.2",
-    "vuefire": "^3.1.18"
+    "konsta": "^3.1.1",
+    "node-irr": "^2.0.5",
+    "vuefire": "^3.1.18",
+    "xirr": "^1.1.0"
   }
 }
